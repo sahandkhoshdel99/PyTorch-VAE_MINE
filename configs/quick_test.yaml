@@ -16,8 +16,8 @@ model_params:
 data_params:
   data_path: "Data/"
   dataset_name: "dsprites"  # Use smaller dataset first
-  train_batch_size: 8  # Very small batch
-  val_batch_size: 8
+  train_batch_size: 2  # Lowered for memory safety
+  val_batch_size: 2
   patch_size: 64
   num_workers: 0  # No multiprocessing to save memory
 
