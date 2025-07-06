@@ -56,16 +56,37 @@ Input Image → Encoder → Factor Encoder → Cross Attention → Decoder → O
 
 ## Installation
 
-### Prerequisites
+### Recommended: Use requirements.txt
 ```bash
-pip install torch torchvision pytorch-lightning
-pip install lpips scikit-learn scipy
-pip install tensorboard
-pip install matplotlib seaborn
+# (Recommended) Create a virtual environment first
+python -m venv mine_vae_env
+source mine_vae_env/bin/activate
+
+# Install all dependencies
+pip install -r requirements.txt
 ```
 
-### Additional Dependencies
+### Key Package Versions
+- torch==2.1.2
+- torchvision==0.16.2
+- torchaudio==2.1.2
+- pytorch-lightning==2.5.2
+- h5py>=3.10.0
+- numpy>=1.21.0
+- scipy>=1.7.0
+- scikit-learn>=1.0.0
+- matplotlib>=3.5.0
+- seaborn>=0.11.0
+- tensorboard>=2.8.0
+- lpips>=0.1.4
+- tqdm>=4.62.0
+- Pillow>=8.3.0
+
+### (Optional) Using Conda
+If you prefer conda, create an environment and use pip for PyTorch Lightning:
 ```bash
+conda create -n mine_vae_env python=3.9
+conda activate mine_vae_env
 pip install -r requirements.txt
 ```
 
