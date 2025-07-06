@@ -23,6 +23,7 @@ class VAEXperiment(pl.LightningModule):
         self.params = params
         self.curr_device = None
         self.hold_graph = False
+        self.automatic_optimization = False  # Manual optimization for multiple optimizers
         try:
             self.hold_graph = self.params['retain_first_backpass']
         except:
@@ -31,32 +32,48 @@ class VAEXperiment(pl.LightningModule):
     def forward(self, input: Tensor, **kwargs) -> Tensor:
         return self.model(input, **kwargs)
 
-    def training_step(self, batch, batch_idx, optimizer_idx = 0):
+    def training_step(self, batch, batch_idx):
         real_img, labels = batch
         self.curr_device = real_img.device
 
-        results = self.forward(real_img, labels = labels)
-        train_loss = self.model.loss_function(*results,
-                                              M_N = self.params['kld_weight'], #al_img.shape[0]/ self.num_train_imgs,
-                                              optimizer_idx=optimizer_idx,
-                                              batch_idx = batch_idx)
+        optimizers = self.optimizers()
+        if not isinstance(optimizers, (list, tuple)):
+            optimizers = [optimizers]
+
+        # Forward pass
+        results = self.forward(real_img, labels=labels)
+        # Compute loss for each optimizer (if needed)
+        if len(optimizers) == 1:
+            train_loss = self.model.loss_function(*results,
+                                                  M_N=self.params['kld_weight'],
+                                                  batch_idx=batch_idx)
+            optimizer = optimizers[0]
+            optimizer.zero_grad()
+            self.manual_backward(train_loss['loss'])
+            optimizer.step()
+        else:
+            # If you have two optimizers, handle both
+            for idx, optimizer in enumerate(optimizers):
+                train_loss = self.model.loss_function(*results,
+                                                      M_N=self.params['kld_weight'],
+                                                      optimizer_idx=idx,
+                                                      batch_idx=batch_idx)
+                optimizer.zero_grad()
+                self.manual_backward(train_loss['loss'])
+                optimizer.step()
 
         self.log_dict({key: val.item() for key, val in train_loss.items()}, sync_dist=True)
-
         return train_loss['loss']
 
-    def validation_step(self, batch, batch_idx, optimizer_idx = 0):
+    def validation_step(self, batch, batch_idx):
         real_img, labels = batch
         self.curr_device = real_img.device
 
-        results = self.forward(real_img, labels = labels)
+        results = self.forward(real_img, labels=labels)
         val_loss = self.model.loss_function(*results,
-                                            M_N = 1.0, #real_img.shape[0]/ self.num_val_imgs,
-                                            optimizer_idx = optimizer_idx,
-                                            batch_idx = batch_idx)
-
+                                            M_N=1.0,
+                                            batch_idx=batch_idx)
         self.log_dict({f"val_{key}": val.item() for key, val in val_loss.items()}, sync_dist=True)
-
         
     def on_validation_end(self) -> None:
         self.sample_images()

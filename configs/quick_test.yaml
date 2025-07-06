@@ -1,0 +1,39 @@
+model_params:
+  name: 'MINEDisentangleVAE'
+  in_channels: 3
+  latent_dim: 64  # Reduced from 128
+  num_factors: 6  # For 3DShapes
+  factor_dim: 16  # Reduced from 32
+  attention_dim: 64  # Reduced from 128
+  mine_hidden_dim: 64  # Reduced from 128
+  disentanglement_weight: 1.0
+  attention_reg_weight: 0.1
+  entropy_reg_weight: 0.05
+  bi_level_outer_steps: 2  # Reduced from 5
+  bi_level_inner_steps: 2  # Reduced from 3
+  gaussian_fit_samples: 100  # Reduced from 1000
+
+data_params:
+  data_path: "Data/"
+  dataset_name: "dsprites"  # Use smaller dataset first
+  train_batch_size: 8  # Very small batch
+  val_batch_size: 8
+  patch_size: 64
+  num_workers: 0  # No multiprocessing to save memory
+
+exp_params:
+  LR: 0.001
+  weight_decay: 0.0001
+  scheduler_gamma: 0.95
+  kld_weight: 0.00025
+  manual_seed: 1265
+
+trainer_params:
+  accelerator: "cpu"  # Use CPU to avoid GPU memory issues
+  devices: 1  # Single device (CPU)
+  max_epochs: 1  # Just 1 epoch for quick test
+  log_every_n_steps: 10  # Log more frequently
+
+logging_params:
+  save_dir: "logs/"
+  name: "QuickTest" 

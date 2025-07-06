@@ -138,7 +138,7 @@ class CrossAttention(nn.Module):
             
         Returns:
             attended_latent: [batch_size, latent_dim]
-            attention_weights: [batch_size, num_heads, latent_dim, num_factors]
+            attention_weights: [batch_size, num_heads, 1, 1] - simplified for now
         """
         batch_size = latent_codes.size(0)
         
@@ -169,9 +169,7 @@ class CrossAttention(nn.Module):
         # Add residual connection and layer normalization
         attended_latent = self.layer_norm(attended_latent + latent_codes)
         
-        # Expand attention weights for regularization
-        attention_weights = attention_weights.expand(batch_size, self.num_heads, self.latent_dim, self.num_factors)
-        
+        # Return attention weights without expansion for now
         return attended_latent, attention_weights
 
 
@@ -352,7 +350,7 @@ class MINEDisentangleVAE(BaseVAE):
         mu = self.fc_mu(result)
         log_var = self.fc_var(result)
         
-        return [mu, log_var]
+        return [mu, log_var, result]  # Return flattened result for factor encoder
     
     def decode(self, z: Tensor) -> Tensor:
         """
@@ -379,12 +377,26 @@ class MINEDisentangleVAE(BaseVAE):
         batch_size = latent_codes.size(0)
         mi_scores = []
         
+        # Debug: check if num_factors is valid
+        if self.num_factors <= 0:
+            print(f"Warning: num_factors is {self.num_factors}, using default value")
+            self.num_factors = 6  # Default for dSprites
+        
         for i in range(self.num_factors):
             factor_emb = factor_embeddings[:, i, :]  # [batch_size, factor_dim]
             mi_estimate = self.mine_estimators[i](latent_codes, factor_emb)
             mi_scores.append(mi_estimate)
         
-        return torch.stack(mi_scores, dim=1)  # [batch_size, num_factors]
+        # Debug: check if mi_scores is empty
+        if not mi_scores:
+            print(f"Warning: mi_scores is empty, num_factors={self.num_factors}")
+            # Return a dummy tensor to prevent error
+            return torch.zeros(batch_size, self.num_factors, device=latent_codes.device)
+        
+        # Stack along dimension 0 and then reshape to [batch_size, num_factors]
+        stacked = torch.stack(mi_scores, dim=0)  # [num_factors]
+        # Reshape to [batch_size, num_factors] by repeating for each batch
+        return stacked.unsqueeze(0).expand(batch_size, -1)  # [batch_size, num_factors]
     
     def compute_attention_regularization(self, attention_weights: Tensor) -> Tensor:
         """
@@ -410,10 +422,10 @@ class MINEDisentangleVAE(BaseVAE):
         
         for outer_step in range(self.bi_level_outer_steps):
             # Encode and get factor embeddings
-            mu, log_var = self.encode(input)
+            mu, log_var, result = self.encode(input)
             z = self.reparameterize(mu, log_var)
             
-            factor_embeddings, importance_weights = self.factor_encoder(mu)
+            factor_embeddings, importance_weights = self.factor_encoder(result)
             
             # Compute mutual information
             mi_scores = self.compute_mutual_information(z, factor_embeddings)
@@ -438,7 +450,7 @@ class MINEDisentangleVAE(BaseVAE):
                 kld_loss = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp())
                 
                 # Compute disentanglement loss with adaptive weighting
-                disentanglement_loss = torch.mean(mi_scores * complexity.unsqueeze(-1))
+                disentanglement_loss = torch.mean(mi_scores * complexity)
                 
                 # Compute attention regularization
                 attention_reg = self.compute_attention_regularization(attention_weights)
@@ -487,10 +499,10 @@ class MINEDisentangleVAE(BaseVAE):
             return [losses['total_loss']]
         else:
             # Standard forward pass for evaluation
-            mu, log_var = self.encode(input)
+            mu, log_var, result = self.encode(input)
             z = self.reparameterize(mu, log_var)
             
-            factor_embeddings, importance_weights = self.factor_encoder(mu)
+            factor_embeddings, importance_weights = self.factor_encoder(result)
             attended_latent, _ = self.cross_attention(z, importance_weights)
             
             return [self.decode(attended_latent), input, mu, log_var]
@@ -553,8 +565,8 @@ class MINEDisentangleVAE(BaseVAE):
         """
         Extract factor embeddings for input x
         """
-        mu, _ = self.encode(x)
-        factor_embeddings, _ = self.factor_encoder(mu)
+        mu, log_var, result = self.encode(x)
+        factor_embeddings, importance_weights = self.factor_encoder(result)
         return factor_embeddings
     
     def get_factor_complexity(self, x: Tensor) -> Tensor:
@@ -569,10 +581,10 @@ class MINEDisentangleVAE(BaseVAE):
         """
         Generate latent space traversal for a specific factor
         """
-        mu, log_var = self.encode(x)
+        mu, log_var, result = self.encode(x)
         z = self.reparameterize(mu, log_var)
         
-        factor_embeddings, importance_weights = self.factor_encoder(mu)
+        factor_embeddings, importance_weights = self.factor_encoder(result)
         
         # Create traversal range
         traversal_range = torch.linspace(-2, 2, num_steps).to(x.device)
