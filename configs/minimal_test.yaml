@@ -1,0 +1,31 @@
+model_params:
+  name: 'VanillaVAE'
+  in_channels: 3
+  latent_dim: 16  # Very small
+
+data_params:
+  data_path: "Data/"
+  dataset_name: "dsprites"
+  train_batch_size: 1  # Minimal batch size
+  val_batch_size: 1
+  patch_size: 32  # Smaller patches
+  num_workers: 0
+
+exp_params:
+  LR: 0.001
+  weight_decay: 0.0001
+  scheduler_gamma: 0.95
+  kld_weight: 0.00025
+  manual_seed: 1265
+
+trainer_params:
+  accelerator: "gpu"
+  devices: 1
+  max_epochs: 1
+  log_every_n_steps: 1
+  limit_train_batches: 1  # Only 1 batch
+  limit_val_batches: 1
+
+logging_params:
+  save_dir: "logs/"
+  name: "MinimalTest" 
