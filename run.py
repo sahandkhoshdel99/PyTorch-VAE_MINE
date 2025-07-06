@@ -71,7 +71,7 @@ runner = Trainer(logger=wandb_logger,
                                      monitor= "val_loss",
                                      save_last= True),
                  ],
-                 strategy=DDPStrategy(find_unused_parameters=True),
+                 # strategy=DDPStrategy(find_unused_parameters=True),  # Temporarily disabled for debugging
                  **config['trainer_params'])
 print("[DEBUG] Trainer created")
 
