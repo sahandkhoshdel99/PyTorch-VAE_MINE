@@ -99,7 +99,7 @@ class DSpritesDataset(Dataset):
                  transform: Optional[Callable] = None,
                  train_ratio: float = 0.8):
         
-        self.data_path = Path(data_path) / "dsprites" / "dsprites_ndarray_co1sh3sc6or40x32y32_64x64.npz"
+        self.data_path = Path(data_path) / "dsprites" / "dsprites.npz"
         self.transform = transform
         self.split = split
         self.train_ratio = train_ratio
