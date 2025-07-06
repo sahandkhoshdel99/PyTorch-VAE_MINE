@@ -39,7 +39,13 @@ print("[DEBUG] DataLoader created")
 
 # Get one batch
 for batch in dataloader:
-    print("[DEBUG] Got batch, shape:", batch.shape)
+    print("[DEBUG] Got batch, type:", type(batch))
+    if isinstance(batch, (list, tuple)):
+        print("[DEBUG] Batch is list/tuple, length:", len(batch))
+        if len(batch) > 0:
+            print("[DEBUG] First element shape:", batch[0].shape)
+    else:
+        print("[DEBUG] Batch shape:", batch.shape)
     break
 
 print("[DEBUG] Simple test completed successfully") 
