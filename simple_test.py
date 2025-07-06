@@ -25,12 +25,16 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = model.to(device)
 print(f"[DEBUG] Model moved to {device}")
 
-# Create dataset and dataloader
+# Create dataset and set it up
 dataset = VAEDataset(**config["data_params"])
 print("[DEBUG] Dataset created")
 
-# Get a single batch
-dataloader = DataLoader(dataset, batch_size=1, shuffle=False, num_workers=0)
+# Set up the dataset (this is required for LightningDataModule)
+dataset.setup()
+print("[DEBUG] Dataset setup completed")
+
+# Get a single batch using the train_dataloader
+dataloader = dataset.train_dataloader()
 print("[DEBUG] DataLoader created")
 
 # Get one batch
