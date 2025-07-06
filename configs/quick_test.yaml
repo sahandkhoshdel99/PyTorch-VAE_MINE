@@ -29,7 +29,7 @@ exp_params:
   manual_seed: 1265
 
 trainer_params:
-  accelerator: "cpu"  # Changed to "cpu" for CPU testing
+  accelerator: "gpu"  # Changed back to "gpu" for testing with debug prints
   devices: 1
   max_epochs: 1  # Just 1 epoch for quick test
   log_every_n_steps: 10  # Log more frequently

@@ -417,10 +417,12 @@ class MINEDisentangleVAE(BaseVAE):
         """
         Perform bi-level optimization as described in the paper
         """
+        print("[DEBUG] Starting bi-level optimization")
         # Outer loop: optimize disentanglement objectives
         outer_losses = []
         
         for outer_step in range(self.bi_level_outer_steps):
+            print(f"[DEBUG] Outer step {outer_step + 1}/{self.bi_level_outer_steps}")
             # Encode and get factor embeddings
             mu, log_var, result = self.encode(input)
             z = self.reparameterize(mu, log_var)
@@ -428,15 +430,18 @@ class MINEDisentangleVAE(BaseVAE):
             factor_embeddings, importance_weights = self.factor_encoder(result)
             
             # Compute mutual information
+            print("[DEBUG] Computing mutual information")
             mi_scores = self.compute_mutual_information(z, factor_embeddings)
             
             # Compute Gaussian fit estimates
+            print("[DEBUG] Computing Gaussian fit estimates")
             mu_gaussian, sigma_gaussian, complexity = self.gaussian_fit_estimator(factor_embeddings)
             
             # Inner loop: adapt cross-attention weights
             inner_losses = []
             
             for inner_step in range(self.bi_level_inner_steps):
+                print(f"[DEBUG] Inner step {inner_step + 1}/{self.bi_level_inner_steps}")
                 # Apply cross-attention
                 attended_latent, attention_weights = self.cross_attention(z, importance_weights)
                 
@@ -478,6 +483,7 @@ class MINEDisentangleVAE(BaseVAE):
             # Outer loss is the final inner loss
             outer_losses.append(inner_losses[-1])
         
+        print("[DEBUG] Bi-level optimization completed successfully")
         return {
             'total_loss': outer_losses[-1],
             'recon_loss': recon_loss,
@@ -493,11 +499,15 @@ class MINEDisentangleVAE(BaseVAE):
         """
         Forward pass with bi-level optimization
         """
+        print("[DEBUG] MINEDisentangleVAE forward called")
         if self.training:
+            print("[DEBUG] Training mode - starting bi-level optimization")
             # Use bi-level optimization during training
             losses = self.bi_level_optimization(input)
+            print("[DEBUG] Bi-level optimization completed")
             return [losses['total_loss']]
         else:
+            print("[DEBUG] Evaluation mode - standard forward pass")
             # Standard forward pass for evaluation
             mu, log_var, result = self.encode(input)
             z = self.reparameterize(mu, log_var)
