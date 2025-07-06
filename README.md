@@ -2,6 +2,8 @@
 
 This repository implements a novel disentanglement framework that integrates Mutual Information Neural Estimation (MINE) with cross-attention mechanisms for dynamic latent capacity allocation, as described in our research paper.
 
+**Note:** This repository is based on the [PyTorch-VAE](https://github.com/AntixK/PyTorch-VAE) framework.
+
 ## Abstract
 
 Disentangling data into its compositional generative factors has been a long-standing challenge in deep representation learning. Existing variational approaches often struggle with disentangling the latent space to generative factors in high-dimensional latent spaces. Previous works rely on empirical estimates of mutual information, such as total correlation, which require Monte Carlo sampling and suffer from high variance, limiting their effectiveness in complex data distributions.
