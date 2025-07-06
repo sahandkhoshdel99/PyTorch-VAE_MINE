@@ -239,20 +239,6 @@ attended_latent, attention_weights = model.cross_attention(z, factor_embeddings)
    - Check mutual information estimation stability
    - Monitor Gaussian fit estimator convergence
 
-## Citation
-
-If you use this implementation in your research, please cite:
-
-```bibtex
-@article{mine_disentangle_vae_2024,
-  title={MINE Disentangle VAE: A Novel Disentanglement Framework with Mutual Information Neural Estimation and Cross-Attention},
-  author={Your Name},
-  journal={arXiv preprint},
-  year={2024},
-  url={https://github.com/your-repo/mine-disentangle-vae}
-}
-```
-
 ## Contributing
 
 We welcome contributions! Please feel free to submit issues and pull requests.
@@ -269,10 +255,28 @@ pip install -e .
 python -m pytest tests/test_mine_disentangle_vae.py -v
 ```
 
-## License
+## 📦 Dataset Download Instructions
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+**3DShapes:**  
+- Download [3dshapes.h5](https://storage.googleapis.com/3d-shapes/3dshapes.h5)  
+- Place in: `Data/3dshapes/3dshapes.h5`
 
-## Acknowledgments
+**dSprites:**  
+- Download [dsprites_ndarray_co1sh3sc6or40x32y32_64x64.npz](https://github.com/deepmind/dsprites-dataset/blob/master/dsprites_ndarray_co1sh3sc6or40x32y32_64x64.npz?raw=true)  
+- Place in: `Data/dsprites/dsprites_ndarray_co1sh3sc6or40x32y32_64x64.npz`
 
-This work builds upon the PyTorch-VAE framework and extends it with novel disentanglement techniques. We thank the original authors for their foundational work.
+**MPI3D:**  
+- Download and unzip [mpi3d_realistic.zip](https://www.dropbox.com/s/6q1z9v2v3q2q3g7/mpi3d_realistic.zip?dl=1)  
+- Place in: `Data/mpi3d/mpi3d_realistic/`
+
+**CelebA:**  
+- Download and unzip [img_align_celeba.zip](https://drive.google.com/file/d/1m8-EBPgi5MRubrm6iQjafK2QMHDBMSfJ/view?usp=sharing)  
+- Place images in: `Data/celeba/img_align_celeba/`  
+- Place label files (e.g., `list_attr_celeba.txt`, `identity_CelebA.txt`, `list_bbox_celeba.txt`) in: `Data/celeba/`
+
+| Dataset   | Download Location in Repo                | File(s) Needed                                 | Labels Included? |
+|-----------|------------------------------------------|------------------------------------------------|------------------|
+| 3DShapes  | Data/3dshapes/3dshapes.h5                | 3dshapes.h5                                    | Yes              |
+| dSprites  | Data/dsprites/dsprites_ndarray_...npz    | dsprites_ndarray_co1sh3sc6or40x32y32_64x64.npz | Yes              |
+| MPI3D     | Data/mpi3d/mpi3d_realistic/              | .npz files in extracted folder                 | Yes              |
+| CelebA    | Data/celeba/img_align_celeba/            | image files, .txt label files                  | Yes              |
