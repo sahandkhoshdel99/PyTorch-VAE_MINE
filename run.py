@@ -24,6 +24,8 @@ parser.add_argument('--config',  '-c',
                     default='configs/vae.yaml')
 parser.add_argument('--no-wandb', action='store_true',
                     help='disable wandb logging')
+parser.add_argument('--test-only', action='store_true',
+                    help='test mode - skip training, just test model creation')
 
 args = parser.parse_args()
 with open(args.filename, 'r') as file:
@@ -80,5 +82,9 @@ Path(os.path.join(config['logging_params']['save_dir'], "Samples")).mkdir(exist_
 Path(os.path.join(config['logging_params']['save_dir'], "Reconstructions")).mkdir(exist_ok=True, parents=True)
 
 print(f"======= Training {config['model_params']['name']} =======")
-runner.fit(experiment, datamodule=data)
-print("[DEBUG] Training finished")
+if args.test_only:
+    print("[DEBUG] Test mode - skipping training, just testing model creation")
+    print("[DEBUG] Model creation test completed successfully")
+else:
+    runner.fit(experiment, datamodule=data)
+    print("[DEBUG] Training finished")
