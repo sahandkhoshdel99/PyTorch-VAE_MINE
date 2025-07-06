@@ -26,6 +26,8 @@ parser.add_argument('--no-wandb', action='store_true',
                     help='disable wandb logging')
 parser.add_argument('--test-only', action='store_true',
                     help='test mode - skip training, just test model creation')
+parser.add_argument('--no-callbacks', action='store_true',
+                    help='disable callbacks to test if they cause memory issues')
 
 args = parser.parse_args()
 with open(args.filename, 'r') as file:
@@ -65,14 +67,19 @@ print("[DEBUG] DataModule created")
 data.setup()
 print("[DEBUG] DataModule setup done")
 
+# Prepare callbacks
+callbacks = []
+if not args.no_callbacks:
+    callbacks = [
+        LearningRateMonitor(),
+        ModelCheckpoint(save_top_k=2, 
+                        dirpath =os.path.join(config['logging_params']['save_dir'], "checkpoints"), 
+                        monitor= "val_loss",
+                        save_last= True),
+    ]
+
 runner = Trainer(logger=wandb_logger,
-                 callbacks=[
-                     LearningRateMonitor(),
-                     ModelCheckpoint(save_top_k=2, 
-                                     dirpath =os.path.join(config['logging_params']['save_dir'], "checkpoints"), 
-                                     monitor= "val_loss",
-                                     save_last= True),
-                 ],
+                 callbacks=callbacks,
                  # strategy=DDPStrategy(find_unused_parameters=True),  # Temporarily disabled for debugging
                  **config['trainer_params'])
 print("[DEBUG] Trainer created")
