@@ -1,3 +1,4 @@
+print("[DEBUG] Starting script")
 import os
 import yaml
 import argparse
@@ -13,6 +14,7 @@ from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 from dataset import VAEDataset
 from pytorch_lightning.strategies import DDPStrategy
 
+print("[DEBUG] Imports done")
 
 parser = argparse.ArgumentParser(description='Generic runner for VAE models')
 parser.add_argument('--config',  '-c',
@@ -28,6 +30,8 @@ with open(args.filename, 'r') as file:
     except yaml.YAMLError as exc:
         print(exc)
 
+print("[DEBUG] Config loaded")
+
 # Initialize WandbLogger
 wandb_logger = WandbLogger(
     project=config['logging_params'].get('project', 'MINEDisentangleVAE'),
@@ -36,16 +40,24 @@ wandb_logger = WandbLogger(
     log_model=True
 )
 
+print("[DEBUG] WandbLogger initialized")
+
 # For reproducibility
 seed_everything(config['exp_params']['manual_seed'], True)
+print("[DEBUG] Seed set")
 
 model = vae_models[config['model_params']['name']](**config['model_params'])
+print("[DEBUG] Model created")
 experiment = VAEXperiment(model,
                           config['exp_params'])
+print("[DEBUG] Experiment created")
 
 data = VAEDataset(**config["data_params"], pin_memory=False)
+print("[DEBUG] DataModule created")
 
 data.setup()
+print("[DEBUG] DataModule setup done")
+
 runner = Trainer(logger=wandb_logger,
                  callbacks=[
                      LearningRateMonitor(),
@@ -56,6 +68,7 @@ runner = Trainer(logger=wandb_logger,
                  ],
                  strategy=DDPStrategy(find_unused_parameters=True),
                  **config['trainer_params'])
+print("[DEBUG] Trainer created")
 
 # Optionally create output directories if needed
 Path(os.path.join(config['logging_params']['save_dir'], "Samples")).mkdir(exist_ok=True, parents=True)
@@ -63,3 +76,4 @@ Path(os.path.join(config['logging_params']['save_dir'], "Reconstructions")).mkdi
 
 print(f"======= Training {config['model_params']['name']} =======")
 runner.fit(experiment, datamodule=data)
+print("[DEBUG] Training finished")
