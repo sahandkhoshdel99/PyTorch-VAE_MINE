@@ -29,8 +29,8 @@ exp_params:
   manual_seed: 1265
 
 trainer_params:
-  accelerator: "cpu"  # Use CPU to avoid GPU memory issues
-  devices: 1  # Single device (CPU)
+  accelerator: "gpu"
+  devices: 1
   max_epochs: 1  # Just 1 epoch for quick test
   log_every_n_steps: 10  # Log more frequently
 
