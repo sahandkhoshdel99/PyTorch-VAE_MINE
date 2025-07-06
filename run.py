@@ -22,6 +22,8 @@ parser.add_argument('--config',  '-c',
                     metavar='FILE',
                     help =  'path to the config file',
                     default='configs/vae.yaml')
+parser.add_argument('--no-wandb', action='store_true',
+                    help='disable wandb logging')
 
 args = parser.parse_args()
 with open(args.filename, 'r') as file:
@@ -32,15 +34,18 @@ with open(args.filename, 'r') as file:
 
 print("[DEBUG] Config loaded")
 
-# Initialize WandbLogger
-wandb_logger = WandbLogger(
-    project=config['logging_params'].get('project', 'MINEDisentangleVAE'),
-    name=config['logging_params'].get('name', config['model_params']['name']),
-    save_dir=config['logging_params']['save_dir'],
-    log_model=True
-)
-
-print("[DEBUG] WandbLogger initialized")
+# Initialize WandbLogger conditionally
+if args.no_wandb:
+    wandb_logger = None
+    print("[DEBUG] WandbLogger disabled")
+else:
+    wandb_logger = WandbLogger(
+        project=config['logging_params'].get('project', 'MINEDisentangleVAE'),
+        name=config['logging_params'].get('name', config['model_params']['name']),
+        save_dir=config['logging_params']['save_dir'],
+        log_model=True
+    )
+    print("[DEBUG] WandbLogger initialized")
 
 # For reproducibility
 seed_everything(config['exp_params']['manual_seed'], True)
