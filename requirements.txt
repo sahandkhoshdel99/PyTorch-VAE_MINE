@@ -4,3 +4,8 @@ tensorboard>=2.2.0
 torch>=1.6.1
 torchsummary==1.5.1
 torchvision>=0.10.1
+lpips>=0.1.4
+scikit-learn>=1.0.0
+scipy>=1.7.0
+numpy>=1.21.0
+pytest>=6.0.0
