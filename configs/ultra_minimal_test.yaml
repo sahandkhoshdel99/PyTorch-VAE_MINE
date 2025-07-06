@@ -1,0 +1,33 @@
+model_params:
+  name: 'VanillaVAE'
+  in_channels: 3
+  latent_dim: 8  # Very small
+
+data_params:
+  data_path: "Data/"
+  dataset_name: "dsprites"
+  train_batch_size: 1
+  val_batch_size: 1
+  patch_size: 16  # Very small patches
+  num_workers: 0
+
+exp_params:
+  LR: 0.001
+  weight_decay: 0.0001
+  scheduler_gamma: 0.95
+  kld_weight: 0.00025
+  manual_seed: 1265
+
+trainer_params:
+  accelerator: "gpu"
+  devices: 1
+  max_epochs: 1
+  log_every_n_steps: 1
+  limit_train_batches: 1
+  limit_val_batches: 1
+  enable_progress_bar: false  # Disable progress bar to save memory
+  enable_model_summary: false  # Disable model summary to save memory
+
+logging_params:
+  save_dir: "logs/"
+  name: "UltraMinimalTest" 
