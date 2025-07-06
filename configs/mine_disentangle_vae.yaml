@@ -9,6 +9,9 @@ model_params:
   disentanglement_weight: 1.0
   attention_reg_weight: 0.1
   entropy_reg_weight: 0.05
+  bi_level_outer_steps: 5
+  bi_level_inner_steps: 3
+  gaussian_fit_samples: 1000
 
 data_params:
   data_path: "Data/"
